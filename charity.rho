@@ -1,0 +1,46 @@
+new donate,
+    request,
+    distribute,
+    sumRequests,
+    balanceCh,
+    requestsCh in {
+
+  balanceCh!(0) |   // Initial balance is zero
+  requestsCh!({}) | // Initially there are no requests, so use an empty
+                    // map. Later it will be like {"alice": 5, "bob": 6}
+
+  contract donate(@donor, @amount, ack) = {
+    for(oldBalance <- balanceCh) {
+      balanceCh!(oldBalance + amount)
+      //TODO Keep track of how much each person has donated?
+    }
+  } |
+
+  contract request(@requestor, @amount, ack) = {
+    for(requests <- requestsCh) {
+      requestsCh!(requests.set(requestor, amount))
+      //TODO What if the same person has already made a request
+    }
+  } |
+
+  contract distribute(return) = {
+    new totalRequestsCh in {
+      sumRequests!(*totalRequestsCh) |
+      for(totalRequests <- totalRequestsCh; balance <- balanceCh) {
+        if (totalRequests > balance){
+          //TODO just pay them all
+        }
+        else {
+          // For example if we have 100 tokens requested, but only 75 donated
+          // then we pay 75% of each request. However rholang doesn't
+          // have floating point numbers
+        }
+      }
+    }
+  } |
+
+  contract sumRequests(return) = {
+    //TODO Add up all the requests from the map recursively
+    // Rholang maps have head ...tail pattern matching.
+  }
+}
