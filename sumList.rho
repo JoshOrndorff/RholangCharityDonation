@@ -1,0 +1,19 @@
+new sumList, stdout(`rho:io:stdout`) in {
+
+  contract sumList(@[], return) = {
+    return!(0)
+  } |
+
+
+  contract sumList(@[head, ...tail], return) = {
+    new tailSumCh in { //tailSumCh is a name
+      sumList!(tail, *tailSumCh) |
+      for (@tailSum <- tailSumCh) {
+        return!(head + tailSum)
+      }
+    }
+  } |
+
+  sumList!([1,2,3,4,5], *stdout) |
+  sumList!([], *stdout)
+}
